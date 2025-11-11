@@ -1,0 +1,7 @@
+import AxiosInstance from "../Apis/axiosInstance"
+import { API_END_POINTS } from "../Constants/EndPoints"
+
+
+export const SearchSuggestionApi = async (data) =>{
+    return await AxiosInstance.post(API_END_POINTS.SEARCH_SUGGESTIONS, data)
+}
