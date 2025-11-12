@@ -11,6 +11,7 @@ import Search from './Product/Search';
 import SingleProduct from './Product/SingleProduct';
 import Cart from './Product/Cart';
 import Addresses from './Address/Addresses';
+import Login from './Shared/Login';
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -25,6 +26,7 @@ root.render(
              <Route path='/product/:productId' Component={SingleProduct}></Route>
              <Route path='/cart' Component={Cart}></Route>
              <Route path='/addresses' Component={Addresses}></Route>
+             <Route path='/log-in' Component={Login}></Route>
             
          </Routes>
     </BrowserRouter>
