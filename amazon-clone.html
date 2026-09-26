@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ShopNow – Amazon Clone</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f2;color:#111;min-height:100vh}
+  /* NAVBAR */
+  .navbar{background:#131921;color:#fff;padding:0 16px;display:flex;align-items:center;gap:12px;height:60px;position:sticky;top:0;z-index:100}
+  .logo{font-size:22px;font-weight:700;color:#ff9900;letter-spacing:-0.5px;white-space:nowrap;cursor:pointer}
+  .search-bar{flex:1;display:flex;border-radius:4px;overflow:hidden;max-width:700px}
+  .search-bar input{flex:1;border:none;padding:10px 14px;font-size:14px;outline:none}
+  .search-bar button{background:#ff9900;border:none;padding:0 16px;cursor:pointer;display:flex;align-items:center;font-size:18px}
+  .nav-right{display:flex;gap:16px;align-items:center;margin-left:auto}
+  .nav-btn{color:#fff;background:none;border:none;cursor:pointer;font-size:13px;text-align:center;padding:4px 8px;border-radius:4px}
+  .nav-btn:hover{outline:1px solid #fff}
+  .cart-btn{display:flex;align-items:center;gap:6px;color:#fff;background:none;border:none;cursor:pointer;font-size:13px;padding:4px 8px;border-radius:4px}
+  .cart-btn:hover{outline:1px solid #fff}
+  .cart-count{background:#ff9900;color:#111;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+  /* CATEGORY BAR */
+  .cat-bar{background:#232f3e;padding:6px 16px;display:flex;gap:4px;overflow-x:auto}
+  .cat-bar::-webkit-scrollbar{display:none}
+  .cat-pill{background:none;border:1px solid transparent;color:#fff;padding:5px 12px;font-size:13px;cursor:pointer;border-radius:3px;white-space:nowrap}
+  .cat-pill:hover,.cat-pill.active{border-color:#fff}
+  /* HERO */
+  .hero{background:linear-gradient(135deg,#1a2744 0%,#2d4a8a 50%,#1a2744 100%);color:#fff;padding:48px 32px;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 30% 50%,rgba(255,153,0,.15),transparent 60%)}
+  .hero h1{font-size:clamp(24px,5vw,48px);font-weight:800;margin-bottom:12px;position:relative}
+  .hero p{font-size:16px;opacity:.85;margin-bottom:24px;position:relative}
+  .hero-btn{background:#ff9900;color:#111;border:none;padding:14px 36px;font-size:16px;font-weight:700;border-radius:24px;cursor:pointer;position:relative;transition:transform .15s}
+  .hero-btn:hover{transform:scale(1.04)}
+  /* GRID */
+  .section{max-width:1400px;margin:0 auto;padding:20px 16px}
+  .section-title{font-size:20px;font-weight:700;margin-bottom:16px;color:#111}
+  .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+  /* PRODUCT CARD */
+  .product-card{background:#fff;border-radius:8px;overflow:hidden;cursor:pointer;transition:box-shadow .2s,transform .15s;border:1px solid #ddd}
+  .product-card:hover{box-shadow:0 4px 20px rgba(0,0,0,.15);transform:translateY(-2px)}
+  .product-card img{width:100%;height:180px;object-fit:contain;background:#f8f8f8;padding:16px}
+  .product-info{padding:12px}
+  .product-title{font-size:13px;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:#111}
+  .stars{color:#ff9900;font-size:13px;margin-bottom:4px}
+  .reviews{color:#007185;font-size:12px;margin-bottom:8px}
+  .price-row{display:flex;align-items:baseline;gap:6px}
+  .price{font-size:18px;font-weight:700;color:#111}
+  .price sup{font-size:12px;vertical-align:super}
+  .original-price{font-size:12px;color:#565959;text-decoration:line-through}
+  .badge{display:inline-block;background:#cc0c39;color:#fff;font-size:11px;padding:2px 6px;border-radius:3px;margin-bottom:8px}
+  .add-btn{width:100%;background:#ffd814;border:1px solid #fcd200;border-radius:20px;padding:8px;font-size:13px;font-weight:600;cursor:pointer;margin-top:8px;transition:background .15s}
+  .add-btn:hover{background:#f7ca00}
+  .prime{color:#00a8e1;font-size:11px;font-weight:600}
+  /* CART PANEL */
+  .cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;justify-content:flex-end}
+  .cart-panel{background:#fff;width:min(420px,100vw);height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+  .cart-header{padding:16px 20px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+  .cart-header h2{font-size:18px}
+  .close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:#555;line-height:1}
+  .cart-items{flex:1;padding:12px 16px;overflow-y:auto}
+  .cart-item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0}
+  .cart-item img{width:72px;height:72px;object-fit:contain;background:#f8f8f8;border-radius:4px;padding:4px;flex-shrink:0}
+  .cart-item-info{flex:1}
+  .cart-item-title{font-size:13px;line-height:1.3;margin-bottom:4px}
+  .cart-item-price{font-size:15px;font-weight:700;color:#111}
+  .qty-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+  .qty-btn{background:#f0f0f0;border:1px solid #ccc;width:28px;height:28px;border-radius:4px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+  .qty-btn:hover{background:#e0e0e0}
+  .qty{font-size:14px;font-weight:600;min-width:20px;text-align:center}
+  .remove-btn{background:none;border:none;color:#c45500;font-size:12px;cursor:pointer;margin-top:4px}
+  .remove-btn:hover{text-decoration:underline}
+  .cart-footer{padding:16px 20px;border-top:2px solid #eee;background:#fafafa}
+  .subtotal{display:flex;justify-content:space-between;font-size:15px;margin-bottom:4px}
+  .subtotal strong{font-size:17px}
+  .checkout-main-btn{width:100%;background:#ffd814;border:1px solid #fcd200;border-radius:24px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;margin-top:12px;transition:background .15s}
+  .checkout-main-btn:hover{background:#f7ca00}
+  .empty-cart{text-align:center;padding:48px 20px;color:#555}
+  .empty-cart h3{margin-bottom:8px;font-size:18px}
+  /* CHECKOUT */
+  .checkout-page{max-width:900px;margin:0 auto;padding:24px 16px;display:grid;grid-template-columns:1fr 300px;gap:24px}
+  @media(max-width:640px){.checkout-page{grid-template-columns:1fr}}
+  .checkout-box{background:#fff;border-radius:8px;padding:20px;border:1px solid #ddd}
+  .checkout-box h3{font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #eee}
+  .form-group{margin-bottom:14px}
+  .form-group label{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:#333}
+  .form-group input,.form-group select{width:100%;border:1px solid #888;border-radius:4px;padding:9px 12px;font-size:14px;outline:none;transition:border-color .15s}
+  .form-group input:focus,.form-group select:focus{border-color:#e47911;box-shadow:0 0 0 3px rgba(228,121,17,.15)}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .place-order-btn{width:100%;background:#ff9900;border:none;border-radius:24px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:background .15s}
+  .place-order-btn:hover{background:#e47911}
+  .order-summary-item{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;color:#333}
+  .order-total{display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-top:12px;padding-top:12px;border-top:1px solid #eee}
+  .savings{color:#c45500;font-size:13px;font-weight:600;margin-top:6px;text-align:right}
+  /* SUCCESS */
+  .success-page{text-align:center;padding:60px 20px;max-width:500px;margin:0 auto}
+  .success-icon{font-size:72px;margin-bottom:16px}
+  .success-page h2{font-size:26px;font-weight:800;margin-bottom:8px;color:#111}
+  .success-page p{color:#555;margin-bottom:24px;line-height:1.6}
+  .continue-btn{background:#ffd814;border:1px solid #fcd200;border-radius:24px;padding:12px 32px;font-size:15px;font-weight:700;cursor:pointer}
+  /* PRODUCT DETAIL */
+  .product-detail{max-width:1000px;margin:0 auto;padding:24px 16px;display:grid;grid-template-columns:1fr 1fr;gap:32px}
+  @media(max-width:640px){.product-detail{grid-template-columns:1fr}}
+  .detail-img{background:#fff;border-radius:8px;padding:32px;display:flex;align-items:center;justify-content:center;border:1px solid #ddd}
+  .detail-img img{max-width:100%;max-height:300px;object-fit:contain}
+  .detail-info{background:#fff;border-radius:8px;padding:24px;border:1px solid #ddd}
+  .detail-title{font-size:20px;font-weight:700;margin-bottom:8px;line-height:1.3}
+  .detail-price{font-size:26px;font-weight:800;color:#111;margin:12px 0}
+  .detail-desc{font-size:14px;color:#444;line-height:1.7;margin-bottom:16px}
+  .back-btn{background:none;border:none;color:#007185;cursor:pointer;font-size:14px;padding:0;margin-bottom:16px}
+  .back-btn:hover{text-decoration:underline}
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#232f3e;color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:500;z-index:300;box-shadow:0 4px 16px rgba(0,0,0,.3);animation:slideup .3s ease}
+  @keyframes slideup{from{opacity:0;transform:translateX(-50%) translateY(16px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+  /* NO RESULTS */
+  .no-results{text-align:center;padding:48px;color:#555}
+  .no-results h3{font-size:20px;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+const PRODUCTS = [
+  {id:1,title:"Apple AirPods Pro (2nd Gen) – Active Noise Cancellation",price:179.99,original:249.99,rating:4.8,reviews:24832,category:"Electronics",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=AirPods+Pro",badge:"Save 28%",prime:true,desc:"Industry-leading Active Noise Cancellation reduces unwanted background noise. Adaptive Audio dynamically blends Transparency and ANC. Precision Find My with an Apple Watch shows direction and distance."},
+  {id:2,title:"Samsung 65" QLED 4K Smart TV 2024 Model",price:799.99,original:1199.99,rating:4.6,reviews:8743,category:"Electronics",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=Samsung+TV",badge:"Deal",prime:true,desc:"Quantum Dot technology produces a billion shades of brilliant color. 4K AI upscaling makes everything look its best. Built-in smart features powered by Tizen OS with access to all your favorite apps."},
+  {id:3,title:"Kindle Paperwhite (16 GB) – Now with 3 months free Kindle Unlimited",price:139.99,original:189.99,rating:4.7,reviews:31205,category:"Electronics",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=Kindle",badge:"Limited offer",prime:true,desc:"The thinnest, lightest Kindle Paperwhite yet—with a flush-front design, glare-free display, and 10 weeks of battery life so you can read without interruption."},
+  {id:4,title:"Nike Air Max 270 Men's Shoes – Comfortable Running Sneakers",price:89.99,original:130.00,rating:4.5,reviews:12456,category:"Clothing",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=Nike+Air+Max",badge:"31% off",prime:true,desc:"The Nike Air Max 270 delivers visible cushioning under every step. The design draws inspiration from the Air Max 93 and Air Max 180."},
+  {id:5,title:"Instant Pot Duo 7-in-1 Electric Pressure Cooker, 6 Quart",price:59.99,original:99.95,rating:4.7,reviews:87320,category:"Home",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=Instant+Pot",badge:"Flash Sale",prime:true,desc:"7-in-1 functionality: pressure cooker, slow cooker, rice cooker, steamer, sauté, yogurt maker & warmer. 13 customizable programs for ribs, soups, beans, rice, poultry, and more."},
+  {id:6,title:"The Psychology of Money – Morgan Housel Bestseller",price:14.99,original:19.99,rating:4.8,reviews:55002,category:"Books",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=Book",prime:true,desc:"Timeless lessons on wealth, greed, and happiness doing well with money isn't necessarily about what you know. It's about how you behave."},
+  {id:7,title:'Sony WH-1000XM5 Wireless Noise Canceling Headphones',price:279.99,original:399.99,rating:4.6,reviews:19234,category:"Electronics",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=Sony+WH",badge:"Save 30%",prime:true,desc:"Industry-leading noise cancellation, 30-hour battery life, and multipoint connection to connect to two Bluetooth devices simultaneously."},
+  {id:8,title:"Levi's Men's 511 Slim Fit Jeans – Classic Denim Style",price:39.99,original:69.50,rating:4.4,reviews:9821,category:"Clothing",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=Levis+Jeans",prime:true,desc:"The 511 slim fit jean sits below the waist and is slim through the thigh and leg opening. Made with stretch denim for comfort and mobility."},
+  {id:9,title:"LEGO Technic Bugatti Chiron 42083 – 3,599 Piece Set",price:159.99,original:249.99,rating:4.9,reviews:4210,category:"Toys",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=LEGO+Technic",badge:"Collector's pick",prime:true,desc:"Experience the power and beauty of the legendary Bugatti Chiron with this meticulously crafted LEGO Technic model featuring an 8-speed gearbox."},
+  {id:10,title:"Dyson V15 Detect Cordless Vacuum – Reveals Hidden Dust",price:599.99,original:749.99,rating:4.7,reviews:7321,category:"Home",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=Dyson+V15",badge:"Save ₹150",prime:true,desc:"Laser reveals invisible dust on hard floors. Automatically adapts suction power based on the amount of dust detected. Up to 60 minutes of fade-free power."},
+  {id:11,title:"Atomic Habits – James Clear (Paperback)",price:11.99,original:18.99,rating:4.8,reviews:93412,category:"Books",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=Atomic+Habits",prime:true,desc:"No matter your goals, Atomic Habits offers a proven framework for improving every day. James Clear, one of the world's leading experts on habit formation, reveals practical strategies."},
+  {id:12,title:"Adidas Ultraboost 22 Women's Running Shoes",price:99.95,original:180.00,rating:4.6,reviews:6712,category:"Clothing",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=Adidas+UB",badge:"Save 44%",prime:true,desc:"Made in part with Parley Ocean Plastic, BOOST midsole returns energy with every stride. Designed for runners who want the ultimate combination of cushioning and style."},
+  {id:13,title:"Cuisinart 14-Cup Food Processor – Professional Grade",price:129.99,original:199.99,rating:4.5,reviews:15003,category:"Home",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=Cuisinart+FP",prime:true,desc:"Powerful 720-watt motor handles tough chopping, slicing, shredding, and pureeing tasks. Comes with multiple blades and discs."},
+  {id:14,title:'iPad Air 11" M2 chip – Wi-Fi 128GB – All-Day Performance',price:599.00,original:749.00,rating:4.8,reviews:22018,category:"Electronics",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=iPad+Air",badge:"New",prime:true,desc:"The M2 chip makes iPad Air the ultimate everyday iPad. Built-in Apple Intelligence helps you write, express yourself, and get things done."},
+  {id:15,title:"Hot Wheels 20-Car Pack – Diecast Mini Toy Vehicles",price:24.99,original:34.99,rating:4.7,reviews:18900,category:"Toys",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=Hot+Wheels",prime:true,desc:"20 Hot Wheels cars in 1:64 scale. Each car features authentic detailing and real die-cast metal. Great for kids 3 and up."},
+  {id:16,title:"The Lord of the Rings – J.R.R. Tolkien (Single Volume)",price:22.99,original:35.00,rating:4.9,reviews:41235,category:"Books",image:"https://via.placeholder.com/300x300/f8f8f8/111?text=LOTR",prime:true,desc:"One of the greatest works of fantasy literature ever written. Sauron, the Dark Lord, has gathered to him all the Rings of Power - the means by which he intends to rule Middle-earth."},
+];
+
+const CATEGORIES = ["All","Electronics","Clothing","Home","Books","Toys"];
+
+function StarRating({rating}){
+  const full = Math.floor(rating);
+  const half = rating % 1 >= 0.5;
+  return (
+    <span style={{color:"#ff9900",fontSize:14}}>
+      {"★".repeat(full)}{half?"½":""} <span style={{color:"#555",fontSize:12}}>{rating}</span>
+    </span>
+  );
+}
+
+function Toast({msg}){
+  return <div className="toast">{msg}</div>;
+}
+
+function Navbar({cartCount,onCartClick,searchQuery,setSearchQuery,onLogoClick,onSearchSubmit}){
+  const handleKey = (e) => { if(e.key==="Enter") onSearchSubmit(); };
+  return(
+    <nav className="navbar">
+      <div className="logo" onClick={onLogoClick}>🛒 ShopNow</div>
+      <div className="search-bar">
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={searchQuery}
+          onChange={e=>setSearchQuery(e.target.value)}
+          onKeyDown={handleKey}
+        />
+        <button onClick={onSearchSubmit} aria-label="Search">🔍</button>
+      </div>
+      <div className="nav-right">
+        <button className="nav-btn">Returns<br/>&amp; Orders</button>
+        <button className="cart-btn" onClick={onCartClick}>
+          🛒 Cart
+          {cartCount>0&&<span className="cart-count">{cartCount}</span>}
+        </button>
+      </div>
+    </nav>
+  );
+}
+
+function CategoryBar({active,setActive}){
+  return(
+    <div className="cat-bar">
+      {CATEGORIES.map(c=>(
+        <button key={c} className={`cat-pill${active===c?" active":""}`} onClick={()=>setActive(c)}>{c}</button>
+      ))}
+    </div>
+  );
+}
+
+function ProductCard({product,onAdd,onClick}){
+  const discount = Math.round((1-product.price/product.original)*100);
+  return(
+    <div className="product-card" onClick={()=>onClick(product)}>
+      <img src={product.image} alt={product.title} onError={e=>e.target.src="https://via.placeholder.com/300x300/f8f8f8/111?text=Product"}/>
+      <div className="product-info">
+        {product.badge&&<span className="badge">{product.badge}</span>}
+        <div className="product-title">{product.title}</div>
+        <StarRating rating={product.rating}/>
+        <div className="reviews" style={{color:"#007185",fontSize:12}}>{product.reviews.toLocaleString()} reviews</div>
+        <div className="price-row">
+          <span className="price"><sup>$</sup>{Math.floor(product.price)}<sup>{(product.price%1).toFixed(2).slice(1)}</sup></span>
+          <span className="original-price">${product.original}</span>
+        </div>
+        {product.prime&&<div className="prime">✔ Prime FREE delivery</div>}
+        <button className="add-btn" onClick={e=>{e.stopPropagation();onAdd(product);}}>Add to Cart</button>
+      </div>
+    </div>
+  );
+}
+
+function CartPanel({cart,onClose,setCart,onCheckout}){
+  const total = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const updateQty = (id,delta) => {
+    setCart(prev=>prev.map(i=>i.id===id?{...i,qty:Math.max(1,i.qty+delta)}:i));
+  };
+  const remove = (id) => setCart(prev=>prev.filter(i=>i.id!==id));
+  return(
+    <div className="cart-overlay" onClick={onClose}>
+      <div className="cart-panel" onClick={e=>e.stopPropagation()}>
+        <div className="cart-header">
+          <h2>Shopping Cart ({cart.reduce((s,i)=>s+i.qty,0)} items)</h2>
+          <button className="close-btn" onClick={onClose}>×</button>
+        </div>
+        <div className="cart-items">
+          {cart.length===0
+            ? <div className="empty-cart">
+                <div style={{fontSize:48,marginBottom:12}}>🛒</div>
+                <h3>Your cart is empty</h3>
+                <p style={{fontSize:14,marginTop:4}}>Add items to get started</p>
+              </div>
+            : cart.map(item=>(
+              <div key={item.id} className="cart-item">
+                <img src={item.image} alt={item.title} onError={e=>e.target.src="https://via.placeholder.com/72x72/f8f8f8/111?text=P"}/>
+                <div className="cart-item-info">
+                  <div className="cart-item-title">{item.title}</div>
+                  <div className="cart-item-price">${(item.price*item.qty).toFixed(2)}</div>
+                  {item.prime&&<div className="prime" style={{fontSize:11}}>✔ Prime</div>}
+                  <div className="qty-row">
+                    <button className="qty-btn" onClick={()=>updateQty(item.id,-1)}>−</button>
+                    <span className="qty">{item.qty}</span>
+                    <button className="qty-btn" onClick={()=>updateQty(item.id,1)}>+</button>
+                  </div>
+                  <button className="remove-btn" onClick={()=>remove(item.id)}>Remove</button>
+                </div>
+              </div>
+          ))}
+        </div>
+        {cart.length>0&&(
+          <div className="cart-footer">
+            <div className="subtotal">
+              <span>Subtotal ({cart.reduce((s,i)=>s+i.qty,0)} items):</span>
+              <strong>${total.toFixed(2)}</strong>
+            </div>
+            <div style={{fontSize:12,color:"#007600",marginBottom:4}}>✔ Eligible for FREE Shipping</div>
+            <button className="checkout-main-btn" onClick={()=>{onClose();onCheckout();}}>Proceed to Checkout →</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function CheckoutPage({cart,onBack,onSuccess}){
+  const [form,setForm] = useState({name:"",email:"",address:"",city:"",state:"",zip:"",card:"",expiry:"",cvv:""});
+  const [errors,setErrors] = useState({});
+  const [step,setStep] = useState(0); // 0=shipping,1=payment
+  const subtotal = cart.reduce((s,i)=>s+i.price*i.qty,0);
+  const shipping = subtotal>50?0:5.99;
+  const tax = subtotal*0.08;
+  const total = subtotal+shipping+tax;
+  const savings = cart.reduce((s,i)=>s+(i.original-i.price)*i.qty,0);
+
+  const validate = () => {
+    const e = {};
+    if(!form.name.trim()) e.name="Required";
+    if(!form.email.includes("@")) e.email="Valid email required";
+    if(!form.address.trim()) e.address="Required";
+    if(!form.city.trim()) e.city="Required";
+    if(!form.zip.trim()||form.zip.length<5) e.zip="Valid ZIP required";
+    if(step===1){
+      if(form.card.replace(/\s/g,"").length<16) e.card="Valid card number required";
+      if(!form.expiry.match(/\d{2}\/\d{2}/)) e.expiry="MM/YY format";
+      if(form.cvv.length<3) e.cvv="3-4 digits";
+    }
+    return e;
+  };
+
+  const handleNext = () => {
+    const e = validate();
+    if(Object.keys(e).length) { setErrors(e); return; }
+    if(step===0) { setStep(1); setErrors({}); }
+    else { onSuccess(); }
+  };
+
+  const field = (key,label,placeholder,type="text",fmt=null) => (
+    <div className="form-group">
+      <label>{label}</label>
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={form[key]}
+        onChange={e=>{
+          let v=e.target.value;
+          if(fmt) v=fmt(v,form[key]);
+          setForm(f=>({...f,[key]:v}));
+          setErrors(err=>({...err,[key]:undefined}));
+        }}
+        style={errors[key]?{borderColor:"#c0392b"}:{}}
+      />
+      {errors[key]&&<span style={{color:"#c0392b",fontSize:12}}>{errors[key]}</span>}
+    </div>
+  );
+
+  const fmtCard = (v) => v.replace(/\D/g,"").slice(0,16).replace(/(.{4})/g,"$1 ").trim();
+  const fmtExpiry = (v,prev) => {
+    v = v.replace(/\D/g,"").slice(0,4);
+    if(v.length>=2 && prev.length<4) v = v.slice(0,2)+"/"+v.slice(2);
+    return v;
+  };
+
+  return(
+    <div>
+      <div style={{background:"#fff",borderBottom:"1px solid #eee",padding:"12px 16px"}}>
+        <button className="back-btn" onClick={onBack}>← Back to shopping</button>
+        <h2 style={{fontSize:20,fontWeight:700,display:"inline",marginLeft:8}}>Checkout</h2>
+        <div style={{float:"right",fontSize:13,color:"#555",marginTop:4}}>
+          <span style={{color:step===0?"#ff9900":"#007600",fontWeight:600}}>① Shipping</span>
+          <span style={{margin:"0 8px",color:"#ccc"}}>→</span>
+          <span style={{color:step===1?"#ff9900":"#999",fontWeight:600}}>② Payment</span>
+        </div>
+      </div>
+      <div className="checkout-page">
+        <div>
+          {step===0&&(
+            <div className="checkout-box">
+              <h3>📦 Shipping Address</h3>
+              {field("name","Full Name","John Doe")}
+              {field("email","Email Address","john@example.com","email")}
+              {field("address","Street Address","123 Main St")}
+              <div className="form-row">
+                {field("city","City","New York")}
+                {field("state","State","NY")}
+              </div>
+              {field("zip","ZIP Code","10001")}
+              <button className="place-order-btn" onClick={handleNext}>Continue to Payment →</button>
+            </div>
+          )}
+          {step===1&&(
+            <div className="checkout-box">
+              <h3>💳 Payment Method</h3>
+              <div className="form-group">
+                <label>Card Number</label>
+                <input
+                  placeholder="1234 5678 9012 3456"
+                  value={form.card}
+                  onChange={e=>{setForm(f=>({...f,card:fmtCard(e.target.value)}));setErrors(err=>({...err,card:undefined}));}}
+                  style={errors.card?{borderColor:"#c0392b"}:{}}
+                  maxLength={19}
+                />
+                {errors.card&&<span style={{color:"#c0392b",fontSize:12}}>{errors.card}</span>}
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label>Expiry (MM/YY)</label>
+                  <input
+                    placeholder="12/26"
+                    value={form.expiry}
+                    onChange={e=>{setForm(f=>({...f,expiry:fmtExpiry(e.target.value,form.expiry)}));setErrors(err=>({...err,expiry:undefined}));}}
+                    style={errors.expiry?{borderColor:"#c0392b"}:{}}
+                    maxLength={5}
+                  />
+                  {errors.expiry&&<span style={{color:"#c0392b",fontSize:12}}>{errors.expiry}</span>}
+                </div>
+                <div className="form-group">
+                  <label>CVV</label>
+                  <input
+                    placeholder="123"
+                    value={form.cvv}
+                    onChange={e=>{setForm(f=>({...f,cvv:e.target.value.replace(/\D/g,"").slice(0,4)}));setErrors(err=>({...err,cvv:undefined}));}}
+                    style={errors.cvv?{borderColor:"#c0392b"}:{}}
+                    maxLength={4}
+                    type="password"
+                  />
+                  {errors.cvv&&<span style={{color:"#c0392b",fontSize:12}}>{errors.cvv}</span>}
+                </div>
+              </div>
+              <div style={{background:"#f4f4f4",border:"1px solid #ddd",borderRadius:6,padding:"10px 14px",fontSize:13,color:"#555",marginBottom:16}}>
+                🔒 Your payment info is encrypted and secure. We never store card data.
+              </div>
+              <button className="place-order-btn" style={{background:"#ff9900"}} onClick={handleNext}>
+                🎉 Place Order – ${total.toFixed(2)}
+              </button>
+            </div>
+          )}
+        </div>
+        <div>
+          <div className="checkout-box">
+            <h3>Order Summary</h3>
+            {cart.map(i=>(
+              <div key={i.id} className="order-summary-item">
+                <span style={{flex:1,paddingRight:8}}>{i.title.slice(0,40)}… ×{i.qty}</span>
+                <span>${(i.price*i.qty).toFixed(2)}</span>
+              </div>
+            ))}
+            <div className="order-summary-item" style={{marginTop:8,paddingTop:8,borderTop:"1px solid #eee"}}>
+              <span>Subtotal</span><span>${subtotal.toFixed(2)}</span>
+            </div>
+            <div className="order-summary-item">
+              <span>Shipping</span>
+              <span style={{color:shipping===0?"#007600":""}}>
+                {shipping===0?"FREE":("$"+shipping.toFixed(2))}
+              </span>
+            </div>
+            <div className="order-summary-item">
+              <span>Tax (8%)</span><span>${tax.toFixed(2)}</span>
+            </div>
+            <div className="order-total">
+              <span>Total</span><span>${total.toFixed(2)}</span>
+            </div>
+            {savings>0&&<div className="savings">You save: ${savings.toFixed(2)}! 🎉</div>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProductDetail({product,onBack,onAdd}){
+  const discount = Math.round((1-product.price/product.original)*100);
+  return(
+    <div>
+      <div style={{background:"#fff",borderBottom:"1px solid #eee",padding:"12px 16px"}}>
+        <button className="back-btn" onClick={onBack}>← Back to results</button>
+      </div>
+      <div className="product-detail">
+        <div className="detail-img">
+          <img src={product.image} alt={product.title} onError={e=>e.target.src="https://via.placeholder.com/300x300/f8f8f8/111?text=Product"}/>
+        </div>
+        <div className="detail-info">
+          <div style={{fontSize:12,color:"#555",marginBottom:6}}>{product.category}</div>
+          <h1 className="detail-title">{product.title}</h1>
+          <StarRating rating={product.rating}/>
+          <span style={{color:"#007185",fontSize:13,marginLeft:8}}>{product.reviews.toLocaleString()} ratings</span>
+          <hr style={{margin:"12px 0",borderColor:"#eee"}}/>
+          <div className="detail-price">${product.price.toFixed(2)}</div>
+          <div style={{fontSize:13,color:"#565959",marginBottom:12}}>
+            List price: <s>${product.original}</s>
+            <span style={{color:"#c45500",fontWeight:600,marginLeft:8}}>Save {discount}%</span>
+          </div>
+          {product.prime&&<div className="prime" style={{fontSize:13,marginBottom:12}}>✔ Prime FREE delivery</div>}
+          <div style={{background:"#f0f8ff",border:"1px solid #c8e6fa",borderRadius:6,padding:"10px 14px",fontSize:13,marginBottom:16}}>
+            📦 In Stock · Usually ships within 1-2 days
+          </div>
+          <p className="detail-desc">{product.desc}</p>
+          <button className="checkout-main-btn" style={{background:"#ffd814",border:"1px solid #fcd200",borderRadius:24,padding:"12px 24px",fontSize:15,fontWeight:700,cursor:"pointer",width:"100%",marginBottom:10}} onClick={()=>onAdd(product)}>
+            Add to Cart
+          </button>
+          <button className="place-order-btn" style={{width:"100%"}} onClick={()=>{onAdd(product);}}>
+            Buy Now
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SuccessPage({onContinue,orderId}){
+  return(
+    <div className="success-page">
+      <div className="success-icon">✅</div>
+      <h2>Order Placed!</h2>
+      <p>
+        Thank you for your order.<br/>
+        <strong>Order #{orderId}</strong> has been confirmed.<br/>
+        You'll receive a confirmation email shortly.
+      </p>
+      <div style={{background:"#f0fff4",border:"1px solid #6fcf97",borderRadius:8,padding:"12px 20px",marginBottom:20,fontSize:14}}>
+        📦 Estimated delivery: <strong>2–4 business days</strong>
+      </div>
+      <button className="continue-btn" onClick={onContinue}>Continue Shopping</button>
+    </div>
+  );
+}
+
+function App(){
+  const [cart,setCart] = useState([]);
+  const [searchQuery,setSearchQuery] = useState("");
+  const [activeSearch,setActiveSearch] = useState("");
+  const [activeCategory,setActiveCategory] = useState("All");
+  const [cartOpen,setCartOpen] = useState(false);
+  const [page,setPage] = useState("home"); // home|checkout|success|detail
+  const [selectedProduct,setSelectedProduct] = useState(null);
+  const [toast,setToast] = useState(null);
+  const [orderId] = useState(()=>"ORD-"+Math.random().toString(36).slice(2,10).toUpperCase());
+
+  const showToast = (msg) => {
+    setToast(msg);
+    setTimeout(()=>setToast(null),2500);
+  };
+
+  const addToCart = (product) => {
+    setCart(prev=>{
+      const existing = prev.find(i=>i.id===product.id);
+      if(existing) return prev.map(i=>i.id===product.id?{...i,qty:i.qty+1}:i);
+      return [...prev,{...product,qty:1}];
+    });
+    showToast(`✔ "${product.title.slice(0,30)}..." added to cart`);
+  };
+
+  const cartCount = cart.reduce((s,i)=>s+i.qty,0);
+
+  const filtered = PRODUCTS.filter(p=>{
+    const matchCat = activeCategory==="All"||p.category===activeCategory;
+    const matchSearch = !activeSearch || p.title.toLowerCase().includes(activeSearch.toLowerCase()) || p.category.toLowerCase().includes(activeSearch.toLowerCase());
+    return matchCat && matchSearch;
+  });
+
+  const handleSearch = () => { setActiveSearch(searchQuery); setPage("home"); };
+
+  const handleLogoClick = () => { setSearchQuery(""); setActiveSearch(""); setActiveCategory("All"); setPage("home"); };
+
+  return(
+    <div>
+      <Navbar
+        cartCount={cartCount}
+        onCartClick={()=>setCartOpen(true)}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onLogoClick={handleLogoClick}
+        onSearchSubmit={handleSearch}
+      />
+      {page==="home"&&<CategoryBar active={activeCategory} setActive={setActiveCategory}/>}
+
+      {page==="home"&&(
+        <>
+          {!activeSearch&&activeCategory==="All"&&(
+            <div className="hero">
+              <h1>Millions of products.<br/>One great price.</h1>
+              <p>Free shipping on orders over $50 · Prime delivery in 2 days</p>
+              <button className="hero-btn" onClick={()=>document.querySelector(".section")?.scrollIntoView({behavior:"smooth"})}>
+                Shop Now →
+              </button>
+            </div>
+          )}
+          <div className="section">
+            {activeSearch&&<div style={{marginBottom:12,fontSize:15,color:"#555"}}>Showing results for "<strong>{activeSearch}</strong>" — {filtered.length} products</div>}
+            {!activeSearch&&<h2 className="section-title">{activeCategory==="All"?"Featured Products":activeCategory}</h2>}
+            {filtered.length===0
+              ? <div className="no-results">
+                  <h3>No results for "{activeSearch}"</h3>
+                  <p style={{marginTop:8,fontSize:14}}>Try different keywords or browse by category</p>
+                  <button className="add-btn" style={{width:"auto",padding:"10px 24px",marginTop:16}} onClick={handleLogoClick}>Browse All</button>
+                </div>
+              : <div className="products-grid">
+                  {filtered.map(p=>(
+                    <ProductCard key={p.id} product={p} onAdd={addToCart} onClick={(prod)=>{setSelectedProduct(prod);setPage("detail");}}/>
+                  ))}
+                </div>
+            }
+          </div>
+        </>
+      )}
+
+      {page==="detail"&&selectedProduct&&(
+        <ProductDetail product={selectedProduct} onBack={()=>setPage("home")} onAdd={(p)=>{addToCart(p);}}/>
+      )}
+
+      {page==="checkout"&&(
+        <CheckoutPage
+          cart={cart}
+          onBack={()=>setPage("home")}
+          onSuccess={()=>{setCart([]);setPage("success");}}
+        />
+      )}
+
+      {page==="success"&&(
+        <SuccessPage orderId={orderId} onContinue={()=>{setPage("home");setSearchQuery("");setActiveSearch("");setActiveCategory("All");}}/>
+      )}
+
+      {cartOpen&&(
+        <CartPanel
+          cart={cart}
+          onClose={()=>setCartOpen(false)}
+          setCart={setCart}
+          onCheckout={()=>{setCartOpen(false);setPage("checkout");}}
+        />
+      )}
+
+      {toast&&<Toast msg={toast}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
